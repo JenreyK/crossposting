@@ -146,13 +146,24 @@ function parseProxyEntry(rawValue) {
 export class TelegramProxyPool {
   constructor(entries, { allowDirectFallback = true, connectTimeoutMs = 10_000 } = {}) {
     this.allowDirectFallback = allowDirectFallback;
-    this.entries = entries.map((entry) => ({
-      ...entry,
-      dispatcher: new ProxyAgent({
-        uri: entry.proxyUrl,
-        connectTimeout: connectTimeoutMs,
-      }),
-    }));
+    this.entries = [];
+
+    entries.forEach((entry) => {
+      try {
+        this.entries.push({
+          ...entry,
+          dispatcher: new ProxyAgent({
+            uri: entry.proxyUrl,
+            connectTimeout: connectTimeoutMs,
+          }),
+        });
+      } catch (error) {
+        warn(
+          `[telegram-proxy] Proxy ${entry.displayUrl} skipped: ${error?.message || "failed to initialize proxy dispatcher"}.`,
+        );
+      }
+    });
+
     this.activeIndex = 0;
   }
 
@@ -221,20 +232,20 @@ export function getTelegramProxyPool() {
     10_000,
   );
 
-  if (parsedEntries.length > 0) {
-    log(
-      `[telegram-proxy] Loaded ${parsedEntries.length} usable proxies. Current priority starts with ${parsedEntries[0].displayUrl}.`,
-    );
-  } else if (rawEntries.length > 0) {
-    warn(
-      "[telegram-proxy] Proxy list was provided, but no usable SOCKS/HTTP proxy was found. Falling back to direct connection.",
-    );
-  }
-
   cachedTelegramProxyPool = new TelegramProxyPool(parsedEntries, {
     allowDirectFallback,
     connectTimeoutMs,
   });
+
+  if (cachedTelegramProxyPool.entries.length > 0) {
+    log(
+      `[telegram-proxy] Loaded ${cachedTelegramProxyPool.entries.length} usable proxies. Current priority starts with ${cachedTelegramProxyPool.entries[0].displayUrl}.`,
+    );
+  } else if (rawEntries.length > 0) {
+    warn(
+      "[telegram-proxy] Proxy list was provided, but no usable proxy dispatcher was initialized. Falling back to direct connection.",
+    );
+  }
 
   return cachedTelegramProxyPool;
 }
