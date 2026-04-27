@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Runtime/state
+.runtime/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Local secrets/config
+.env
+.env.*
+!.env.example
+!.env.test.example
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

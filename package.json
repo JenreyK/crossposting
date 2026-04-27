@@ -1,0 +1,18 @@
+{
+  "name": "telegram-vk-max-crossposting",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js start",
+    "start:test": "node src/index.js start --env .env.test",
+    "check": "node src/index.js check",
+    "check:test": "node src/index.js check --env .env.test",
+    "max:chats": "node src/index.js max:chats",
+    "max:chats:test": "node src/index.js max:chats --env .env.test",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "undici": "^8.1.0"
+  }
+}
